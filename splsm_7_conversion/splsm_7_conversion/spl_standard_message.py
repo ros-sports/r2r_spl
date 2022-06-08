@@ -32,7 +32,7 @@ SPL_STANDARD_MESSAGE_DATA_SIZE = 474
 #     - Time:       Seconds (s)
 SPLStandardMessage = Struct(
     'header' / Const(SPL_STANDARD_MESSAGE_STRUCT_HEADER),  # "SPL "
-    'version' / Const(SPL_STANDARD_MESSAGE_STRUCT_VERSION, Byte),  # has to be set to SPL_STANDARD_MESSAGE_STRUCT_VERSION  # noqa: E501
+    'version' / Const(Byte, SPL_STANDARD_MESSAGE_STRUCT_VERSION),  # has to be set to SPL_STANDARD_MESSAGE_STRUCT_VERSION  # noqa: E501
     'playerNum' / Default(Byte, 0),  # [MANDATORY FIELD] 1-7
     'teamNum' / Default(Byte, 0),  # [MANDATORY FIELD] the number of the team (as provided by the organizers)  # noqa: E501
     'fallen' / Default(Byte, 255),  # [MANDATORY FIELD] 1 means that the robot is fallen, 0 means that the robot can play  # noqa: E501
