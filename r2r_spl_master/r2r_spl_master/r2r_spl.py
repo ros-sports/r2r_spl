@@ -81,7 +81,7 @@ class R2RSPL(Node):
                 # Publish it if its not from myself
                 if msg.player_num != self.player_num:
                     self._publisher.publish(msg)
-            except TimeoutError:
+            except socket.timeout:
                 pass
 
     def _topic_callback(self, msg):
