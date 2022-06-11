@@ -6,3 +6,5 @@
 [![Build and Test (rolling)](https://github.com/ijnek/r2r_spl/actions/workflows/build_and_test_rolling.yaml/badge.svg?branch=rolling)](https://github.com/ijnek/r2r_spl/actions/workflows/build_and_test_rolling.yaml?query=branch:rolling)
 
 ROS2 package that handles intra-team communication using SPLStandardMessage defined in the RoboCup SPL rulebook.
+
+For more information, see our [Documentation](https://robot2robot-spl.readthedocs.io/)
