@@ -3,7 +3,7 @@
 <package format="3">
   <name>r2r_spl_7</name>
   <version>0.0.0</version>
-  <description>Robot-To-Robot communication in RoboCup SPL</description>
+  <description>Robot-To-Robot communication in RoboCup SPL using SPLSM V7</description>
   <maintainer email="kenjibrameld@gmail.com">ijnek</maintainer>
   <license>Apache License 2.0</license>
 

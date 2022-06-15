@@ -15,7 +15,7 @@ setup(
     zip_safe=True,
     maintainer='ijnek',
     maintainer_email='kenjibrameld@gmail.com',
-    description='Robot-To-Robot communication in RoboCup SPL',
+    description='Robot-To-Robot communication in RoboCup SPL using SPLSM V7',
     license='Apache License 2.0',
     tests_require=['pytest'],
     entry_points={
