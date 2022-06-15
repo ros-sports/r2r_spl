@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'r2r_spl_2022'
+package_name = 'r2r_spl_7'
 
 setup(
     name=package_name,
@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'r2r_spl = r2r_spl_2022.r2r_spl:main',
+            'r2r_spl = r2r_spl_7.r2r_spl:main',
         ],
     },
 )

@@ -17,7 +17,7 @@ import time
 
 from construct import Container
 
-from r2r_spl_2022.r2r_spl import R2RSPL
+from r2r_spl_7.r2r_spl import R2RSPL
 
 import rclpy
 from rclpy.parameter import Parameter
