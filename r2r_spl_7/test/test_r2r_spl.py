@@ -131,7 +131,7 @@ class TestR2RSPL:
         # Check if packet has arrived
         try:
             _ = sock.recv(1024)
-        except TimeoutError:
+        except socket.timeout:
             assert False
 
         # Shutdown
