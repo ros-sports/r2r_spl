@@ -2,7 +2,7 @@
 Changelog for package splsm_7
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
+2.0.1 (2022-08-09)
 ------------------
 * Adapt to modified SPLSM msg
 * Deduce num_of_data_bytes from data bounded array size
