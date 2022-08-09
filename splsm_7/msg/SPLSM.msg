@@ -4,5 +4,4 @@ uint8 fallen 255
 float32[3] pose [0.0, 0.0, 0.0]
 float32 ball_age -1.0
 float32[2] ball [0.0, 0.0]
-uint16 num_of_data_bytes
-uint8[474] data
+uint8[<=474] data
