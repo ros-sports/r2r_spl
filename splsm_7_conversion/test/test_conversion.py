@@ -30,10 +30,7 @@ def test_splsm_msg_to_data():
     msg.pose = [1.0, 2.0, 3.0]
     msg.ball_age = 20.0
     msg.ball = [10.0, 20.0]
-    msg.num_of_data_bytes = 3
-    data = [0, 1, 255]
-    for idx, item in enumerate(data):
-        msg.data[idx] = item
+    msg.data = [0, 1, 255]
     data = splsm_msg_to_data(msg)
 
     parsed = SPLStandardMessage.parse(data)
@@ -52,10 +49,10 @@ def test_splsm_msg_to_data():
 def test_splsm_data_to_msg():
     """Test conversion of binary data to SPLSM msg."""
     # Fill data array with my data
-    data = [0] * SPL_STANDARD_MESSAGE_DATA_SIZE
-    my_data = [0, 1, 255]
-    for idx, item in enumerate(my_data):
-        data[idx] = item
+    data = [0, 1, 255]
+    data_ = [0] * SPL_STANDARD_MESSAGE_DATA_SIZE
+    for idx, item in enumerate(data):
+        data_[idx] = item
 
     splsm_data = SPLStandardMessage.build(
         Container(
@@ -65,8 +62,8 @@ def test_splsm_data_to_msg():
             pose=[1.0, 2.0, 3.0],
             ballAge=20.0,
             ball=[10.0, 20.0],
-            numOfDataBytes=len(my_data),
-            data=data,
+            numOfDataBytes=len(data),
+            data=data_,
         )
     )
 
@@ -77,5 +74,6 @@ def test_splsm_data_to_msg():
     assert (msg.pose == [1.0, 2.0, 3.0]).all()  # Check numpy array
     assert msg.ball_age == 20.0
     assert (msg.ball == [10.0, 20.0]).all()  # Check numpy array
-    assert msg.num_of_data_bytes == 3
-    assert (msg.data == data).all()  # Check numpy array
+    assert len(msg.data) == len(data)
+    for a, b in zip(msg.data, data):
+        assert a == b
