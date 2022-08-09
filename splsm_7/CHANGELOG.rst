@@ -2,8 +2,8 @@
 Changelog for package splsm_7
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.1 (2022-08-09)
+------------------
 * Change SPLSM msg data field to bounded array
 * Remove SPLSM msg num_of_data_bytes field
 * Contributors: Kenji Brameld
