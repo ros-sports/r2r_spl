@@ -33,15 +33,9 @@ def splsm_msg_to_data(msg: SPLSM) -> bytes:
         fallen=msg.fallen,
         pose=msg.pose.tolist(),  # Must convert numpy.ndarray to list
         ballAge=msg.ball_age,
-<<<<<<< HEAD
         ball=msg.ball.tolist(),  # Must convert numpy.ndarray to list
-        numOfDataBytes=msg.num_of_data_bytes,
-        data=msg.data.tolist()  # Must convert numpy.ndarray to list
-=======
-        ball=msg.ball,
         numOfDataBytes=len(msg.data),
         data=data
->>>>>>> 081022e (change data to bounded array, and deduce length of data from data)
     )
     data = SPLStandardMessage.build(container)
     return data
