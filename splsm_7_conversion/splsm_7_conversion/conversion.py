@@ -16,11 +16,17 @@ from construct import Container
 
 from splsm_7.msg import SPLSM
 
-from splsm_7_conversion.spl_standard_message import SPLStandardMessage
+from splsm_7_conversion.spl_standard_message import \
+    SPL_STANDARD_MESSAGE_DATA_SIZE, SPLStandardMessage
 
 
 def splsm_msg_to_data(msg: SPLSM) -> bytes:
     """Convert SPLSM ROS msg to binary data."""
+    # Fill data array with msg.data
+    data = [0] * SPL_STANDARD_MESSAGE_DATA_SIZE
+    for idx, item in enumerate(msg.data):
+        data[idx] = item
+
     container = Container(
         playerNum=msg.player_num,
         teamNum=msg.team_num,
@@ -28,8 +34,8 @@ def splsm_msg_to_data(msg: SPLSM) -> bytes:
         pose=msg.pose,
         ballAge=msg.ball_age,
         ball=msg.ball,
-        numOfDataBytes=msg.num_of_data_bytes,
-        data=msg.data
+        numOfDataBytes=len(msg.data),
+        data=data
     )
     data = SPLStandardMessage.build(container)
     return data
@@ -45,6 +51,5 @@ def splsm_data_to_msg(data: bytes) -> SPLSM:
     msg.pose = parsed.pose
     msg.ball_age = parsed.ballAge
     msg.ball = parsed.ball
-    msg.num_of_data_bytes = parsed.numOfDataBytes
-    msg.data = parsed.data
+    msg.data = parsed.data[0:parsed.numOfDataBytes]
     return msg
