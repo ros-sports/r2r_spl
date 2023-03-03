@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'splsm_7_conversion'
+package_name = 'splsm_8_conversion'
 
 setup(
     name=package_name,
@@ -15,7 +15,7 @@ setup(
     zip_safe=True,
     maintainer='ijnek',
     maintainer_email='kenjibrameld@gmail.com',
-    description=('Converts Standard Platform League Standard Message V7 between ROS msg'
+    description=('Converts Standard Platform League Standard Message V8 between ROS msg'
                  'and UDP raw bytes'),
     license='Apache License 2.0',
     tests_require=['pytest'],

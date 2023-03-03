@@ -14,9 +14,9 @@
 
 from construct import Container
 
-from splsm_7.msg import SPLSM
+from splsm_8.msg import SPLSM
 
-from splsm_7_conversion.spl_standard_message import \
+from splsm_8_conversion.spl_standard_message import \
     SPL_STANDARD_MESSAGE_DATA_SIZE, SPLStandardMessage
 
 
