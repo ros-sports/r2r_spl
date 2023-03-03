@@ -17,7 +17,7 @@ import time
 
 from construct import Container
 
-from r2r_spl_master.r2r_spl import R2RSPL
+from r2r_spl_8.r2r_spl import R2RSPL
 
 import rclpy
 from rclpy.parameter import Parameter
@@ -56,7 +56,7 @@ class TestR2RSPL:
         msg = SPLStandardMessage.build(
             Container(playerNum=2, teamNum=self.team_num))
 
-        # UDP - adapted from https://github.com/ninedraft/python-udp/blob/master/server.py
+        # UDP - adapted from https://github.com/ninedraft/python-udp/blob/8/server.py
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -86,7 +86,7 @@ class TestR2RSPL:
         msg = SPLStandardMessage.build(
             Container(playerNum=self.player_num, teamNum=self.team_num))
 
-        # UDP - adapted from https://github.com/ninedraft/python-udp/blob/master/server.py
+        # UDP - adapted from https://github.com/ninedraft/python-udp/blob/8/server.py
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -111,7 +111,7 @@ class TestR2RSPL:
         test_node = rclpy.node.Node('test')
         publisher = test_node.create_publisher(SPLSM, 'r2r/send', 10)
 
-        # UDP - adapted from https://github.com/ninedraft/python-udp/blob/master/server.py
+        # UDP - adapted from https://github.com/ninedraft/python-udp/blob/8/server.py
         sock = socket.socket(
             socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
