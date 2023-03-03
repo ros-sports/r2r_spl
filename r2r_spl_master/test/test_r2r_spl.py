@@ -22,9 +22,9 @@ from r2r_spl_master.r2r_spl import R2RSPL
 import rclpy
 from rclpy.parameter import Parameter
 
-from splsm_7.msg import SPLSM
+from splsm_8.msg import SPLSM
 
-from splsm_7_conversion.spl_standard_message import SPLStandardMessage
+from splsm_8_conversion.spl_standard_message import SPLStandardMessage
 
 
 class TestR2RSPL:

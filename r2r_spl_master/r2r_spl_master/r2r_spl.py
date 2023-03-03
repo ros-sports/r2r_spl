@@ -18,8 +18,8 @@ from threading import Thread
 import rclpy
 from rclpy.node import Node
 
-from splsm_7.msg import SPLSM
-from splsm_7_conversion.conversion import splsm_data_to_msg, splsm_msg_to_data
+from splsm_8.msg import SPLSM
+from splsm_8_conversion.conversion import splsm_data_to_msg, splsm_msg_to_data
 
 
 class R2RSPL(Node):
