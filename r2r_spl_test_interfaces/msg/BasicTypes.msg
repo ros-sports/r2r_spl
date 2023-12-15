@@ -1,5 +1,5 @@
 bool val_bool
-# byte val_byte
+# byte val_byte  # Some issues with this one, look into it later
 char val_char
 float32 val_float32
 float64 val_float64
@@ -11,5 +11,3 @@ int32 val_int32
 uint32 val_uint32
 int64 val_int64
 uint64 val_uint64
-# string val_string
-# wstring val_wstring

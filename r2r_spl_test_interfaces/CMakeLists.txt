@@ -11,7 +11,9 @@ find_package(rosidl_default_generators REQUIRED)
 
 # generate interfaces
 rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/ArrayTypes.msg"
   "msg/BasicTypes.msg"
+  "msg/MessageTypes.msg"
 )
 
 # export dependencies
