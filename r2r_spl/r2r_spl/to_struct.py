@@ -26,7 +26,7 @@ def to_struct(msg_class) -> construct.Struct:
         if isinstance(t, rosidl_parser.definition.NamespacedType):
             mod = __import__('.'.join(t.namespaces), fromlist=[t.name])
             klass = getattr(mod, t.name)
-            members.append(s / get_construct_type(klass))
+            members.append(s / to_struct(klass))
 
         # Check if array
 
