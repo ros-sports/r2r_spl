@@ -1,5 +1,5 @@
 bool val_bool
-# byte val_byte  # Some issues with this one, look into it later
+byte val_byte
 char val_char
 float32 val_float32
 float64 val_float64

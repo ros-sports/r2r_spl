@@ -4,9 +4,8 @@ import rosidl_parser.definition
 basic_type_conversion = {
     'float': construct.Float32l,
     'double': construct.Float64l,
-    'char': construct.Int8ul,
     'boolean': construct.Flag,
-    'octet': construct.Byte,
+    'octet': construct.Bytes(1),
     'int8': construct.Int8sl,
     'uint8': construct.Int8ul,
     'int16': construct.Int16sl,

@@ -31,7 +31,8 @@ class TestSerialization(unittest.TestCase):
         # Create message instance
         msg_instance = BasicTypes()
         msg_instance.val_bool = True
-        # msg_instance.val_char = 'A'  # char having issues, fix later
+        msg_instance.val_byte = b'\x10'
+        msg_instance.val_char = ord('A')  # char comes in as a uint8
         msg_instance.val_float32 = 0.01
         msg_instance.val_float64 = 0.02
         msg_instance.val_int8 = -1
@@ -54,8 +55,8 @@ class TestSerialization(unittest.TestCase):
 
         # Check values match original message
         self.assertEqual(deserialized.val_bool, True)
-        # self.assertEqual(deserialized.val_char, 'A')
-        # self.assertEqual(deserialized.val_byte, )  # Some issues with this one, look into it later
+        self.assertEqual(chr(deserialized.val_char), 'A')  # char comes out as a uint8
+        self.assertEqual(deserialized.val_byte, b'\x10')
         self.assertAlmostEqual(deserialized.val_float32, 0.01)
         self.assertAlmostEqual(deserialized.val_float64, 0.02)
         self.assertEqual(deserialized.val_int8, -1)
