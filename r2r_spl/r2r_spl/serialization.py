@@ -30,26 +30,27 @@ def create_container(msg_instance):
             field = getattr(msg_instance, s)
             values[s] = create_container(field)
         # Check if array type
-        if isinstance(t, rosidl_parser.definition.Array) or \
+        elif isinstance(t, rosidl_parser.definition.Array) or \
             isinstance(t, rosidl_parser.definition.UnboundedSequence) or \
             isinstance(t, rosidl_parser.definition.BoundedSequence):
             field = getattr(msg_instance, s)
-            if t.value_type.typename in rosidl_parser.definition.INTEGER_TYPES or \
-                t.value_type.typename in rosidl_parser.definition.FLOATING_POINT_TYPES:
-                values[s] = field.tolist()
-            elif isinstance(t.value_type, rosidl_parser.definition.NamespacedType):
+            if isinstance(t.value_type, rosidl_parser.definition.NamespacedType):
                 values[s] = [create_container(f) for f in field]
             elif isinstance(t.value_type, rosidl_parser.definition.BasicType):
-                values[s] = field
+                if t.value_type.typename in rosidl_parser.definition.INTEGER_TYPES or \
+                    t.value_type.typename in rosidl_parser.definition.FLOATING_POINT_TYPES:
+                    values[s] = field.tolist()
+                else:
+                    values[s] = field
         # Check if string type
-        if isinstance(t, rosidl_parser.definition.UnboundedString) or \
+        elif isinstance(t, rosidl_parser.definition.UnboundedString) or \
             isinstance(t, rosidl_parser.definition.BoundedString):
             values[s] = getattr(msg_instance, s)
         # Check if wstring type
-        if isinstance(t, rosidl_parser.definition.UnboundedWString) or \
+        elif isinstance(t, rosidl_parser.definition.UnboundedWString) or \
             isinstance(t, rosidl_parser.definition.BoundedWString):
             values[s] = getattr(msg_instance, s)
         # Check if basic type
-        if isinstance(t, rosidl_parser.definition.BasicType):
+        elif isinstance(t, rosidl_parser.definition.BasicType):
             values[s] = getattr(msg_instance, s)
     return construct.Container(**values)

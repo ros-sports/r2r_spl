@@ -31,6 +31,7 @@ class TestSerialization(unittest.TestCase):
         # Create message instance
         msg_instance = BasicTypes()
         msg_instance.val_bool = True
+        # msg_instance.val_char = 'A'  # char having issues, fix later
         msg_instance.val_float32 = 0.01
         msg_instance.val_float64 = 0.02
         msg_instance.val_int8 = -1
@@ -48,11 +49,12 @@ class TestSerialization(unittest.TestCase):
         # Deserialize
         deserialized = serialization.deserialize(serialized)
 
-        # Check types match original message
+        # Check type matches original message
         self.assertEqual(type(msg_instance), type(deserialized))
 
         # Check values match original message
         self.assertEqual(deserialized.val_bool, True)
+        # self.assertEqual(deserialized.val_char, 'A')
         # self.assertEqual(deserialized.val_byte, )  # Some issues with this one, look into it later
         self.assertAlmostEqual(deserialized.val_float32, 0.01)
         self.assertAlmostEqual(deserialized.val_float64, 0.02)
@@ -89,7 +91,7 @@ class TestSerialization(unittest.TestCase):
         # Deserialize
         deserialized = serialization.deserialize(serialized)
 
-        # Check types match original message
+        # Check type matches original message
         self.assertEqual(type(msg_instance), type(deserialized))
 
         # Check values match original message
@@ -111,6 +113,8 @@ class TestSerialization(unittest.TestCase):
 
         # Create message instance
         msg_instance = NestedTypes()
+        msg_instance.data_basic_types.val_uint8 = 101
+        msg_instance.data_basic_types_array = [BasicTypes(), BasicTypes(val_int8=-10)]
 
         # Serialize
         serialized = serialization.serialize(msg_instance)
@@ -118,11 +122,13 @@ class TestSerialization(unittest.TestCase):
         # Deserialize
         deserialized = serialization.deserialize(serialized)
 
-        # Check types match original message
+        # Check type matches original message
         self.assertEqual(type(msg_instance), type(deserialized))
 
         # Check values match original message
-        # ....
+        self.assertEqual(deserialized.data_basic_types.val_uint8, 101)
+        self.assertEqual(len(deserialized.data_basic_types_array), 2)
+        self.assertEqual(deserialized.data_basic_types_array[1].val_int8, -10)
 
 if __name__ == '__main__':
     unittest.main()

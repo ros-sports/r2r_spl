@@ -29,8 +29,12 @@ def to_struct(msg_class) -> construct.Struct:
             members.append(s / to_struct(klass))
 
         # Array
-        if isinstance(t, rosidl_parser.definition.Array):
-            if isinstance(t.value_type, rosidl_parser.definition.BasicType):
+        elif isinstance(t, rosidl_parser.definition.Array):
+            if isinstance(t.value_type, rosidl_parser.definition.NamespacedType):
+                mod = __import__('.'.join(t.value_type.namespaces), fromlist=[t.value_type.name])
+                klass = getattr(mod, t.value_type.name)
+                tmp_type = to_struct(klass)
+            elif isinstance(t.value_type, rosidl_parser.definition.BasicType):
                 tmp_type = basic_type_conversion[t.value_type.typename]
             else:
                 tmp_type = to_struct(t.value_type)
@@ -38,9 +42,13 @@ def to_struct(msg_class) -> construct.Struct:
 
         # Unbounded sequence
         # Bounded sequence
-        if isinstance(t, rosidl_parser.definition.UnboundedSequence) or \
+        elif isinstance(t, rosidl_parser.definition.UnboundedSequence) or \
             isinstance(t, rosidl_parser.definition.BoundedSequence):
-            if isinstance(t.value_type, rosidl_parser.definition.BasicType):
+            if isinstance(t.value_type, rosidl_parser.definition.NamespacedType):
+                mod = __import__('.'.join(t.value_type.namespaces), fromlist=[t.value_type.name])
+                klass = getattr(mod, t.value_type.name)
+                tmp_type = to_struct(klass)
+            elif isinstance(t.value_type, rosidl_parser.definition.BasicType):
                 tmp_type = basic_type_conversion[t.value_type.typename]
             else:
                 tmp_type = to_struct(t.value_type)
@@ -48,17 +56,17 @@ def to_struct(msg_class) -> construct.Struct:
 
         # Unbounded string
         # Bounded string
-        if isinstance(t, rosidl_parser.definition.UnboundedString) or \
+        elif isinstance(t, rosidl_parser.definition.UnboundedString) or \
             isinstance(t, rosidl_parser.definition.BoundedString):
             members.append(s / construct.PascalString(construct.VarInt, 'utf8'))
 
         # Unbounded wstring
         # Bounded wstring
-        if isinstance(t, rosidl_parser.definition.UnboundedWString) or \
+        elif isinstance(t, rosidl_parser.definition.UnboundedWString) or \
             isinstance(t, rosidl_parser.definition.BoundedWString):
             members.append(s / construct.PascalString(construct.VarInt, 'utf16'))
 
         # Basic type
-        if isinstance(t, rosidl_parser.definition.BasicType):
+        elif isinstance(t, rosidl_parser.definition.BasicType):
             members.append(s / basic_type_conversion[t.typename])
     return construct.Struct(*members)
