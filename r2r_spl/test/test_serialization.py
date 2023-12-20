@@ -23,7 +23,7 @@ import numpy.testing
 
 class TestSerialization(unittest.TestCase):
 
-    def test_serialization_basic_types(self):
+    def test_basic_types(self):
         """Test serialization and deserialization of basic types"""
         # Initialize serialization object
         serialization = Serialization(BasicTypes)
@@ -56,16 +56,16 @@ class TestSerialization(unittest.TestCase):
         # self.assertEqual(deserialized.val_byte, )  # Some issues with this one, look into it later
         self.assertAlmostEqual(deserialized.val_float32, 0.01)
         self.assertAlmostEqual(deserialized.val_float64, 0.02)
-        self.assertAlmostEqual(deserialized.val_int8, -1)
-        self.assertAlmostEqual(deserialized.val_uint8, 2)
-        self.assertAlmostEqual(deserialized.val_int16, -3)
-        self.assertAlmostEqual(deserialized.val_uint16, 4)
-        self.assertAlmostEqual(deserialized.val_int32, -5)
-        self.assertAlmostEqual(deserialized.val_uint32, 6)
-        self.assertAlmostEqual(deserialized.val_int64, -7)
-        self.assertAlmostEqual(deserialized.val_uint64, 8)
+        self.assertEqual(deserialized.val_int8, -1)
+        self.assertEqual(deserialized.val_uint8, 2)
+        self.assertEqual(deserialized.val_int16, -3)
+        self.assertEqual(deserialized.val_uint16, 4)
+        self.assertEqual(deserialized.val_int32, -5)
+        self.assertEqual(deserialized.val_uint32, 6)
+        self.assertEqual(deserialized.val_int64, -7)
+        self.assertEqual(deserialized.val_uint64, 8)
 
-    def test_serialization_array_types(self):
+    def test_array_types(self):
         """Test serialization and deserialization of array types"""
         # Initialize serialization object
         serialization = Serialization(ArrayTypes)
@@ -73,6 +73,11 @@ class TestSerialization(unittest.TestCase):
         # Create message instance
         msg_instance = ArrayTypes()
         msg_instance.data_int8_static = [1, 2, 3]
+        msg_instance.data_bool_static = [False, True]
+        msg_instance.data_int8_unbounded_dynamic = [10, 20, 30, 40]
+        msg_instance.data_bool_unbounded_dynamic = [True, False, True, False, True]
+        msg_instance.data_int8_bounded_dynamic = [70, 80]
+        msg_instance.data_bool_bounded_dynamic = [False]
 
         # Serialize
         serialized = serialization.serialize(msg_instance)
@@ -84,9 +89,14 @@ class TestSerialization(unittest.TestCase):
         self.assertEqual(type(msg_instance), type(deserialized))
 
         # Check values match original message
-        # numpy.testing.assert_array_equal(deserialized.data_int8_static, [1, 2, 3])
+        numpy.testing.assert_array_equal(deserialized.data_int8_static, [1, 2, 3])
+        self.assertEqual(deserialized.data_bool_static, [False, True])
+        numpy.testing.assert_array_equal(deserialized.data_int8_unbounded_dynamic, [10, 20, 30, 40])
+        self.assertEqual(deserialized.data_bool_unbounded_dynamic, [True, False, True, False, True])
+        numpy.testing.assert_array_equal(deserialized.data_int8_bounded_dynamic, [70, 80])
+        self.assertEqual(deserialized.data_bool_bounded_dynamic, [False])
 
-    def test_serialization_nested_types(self):
+    def test_nested_types(self):
         """Test serialization and deserialization of nested types"""
         # Initialize serialization object
         serialization = Serialization(NestedTypes)

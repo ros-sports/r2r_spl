@@ -22,27 +22,39 @@ def to_struct(msg_class) -> construct.Struct:
 
     members = []
     for s, t in zip(msg_class.get_fields_and_field_types().keys(), msg_class.SLOT_TYPES):
-        # Check if namespaced type
+        # Nested Type
         if isinstance(t, rosidl_parser.definition.NamespacedType):
             mod = __import__('.'.join(t.namespaces), fromlist=[t.name])
             klass = getattr(mod, t.name)
             members.append(s / to_struct(klass))
 
-        # Check if array
+        # Array
+        if isinstance(t, rosidl_parser.definition.Array):
+            if isinstance(t.value_type, rosidl_parser.definition.BasicType):
+                tmp_type = basic_type_conversion[t.value_type.typename]
+            else:
+                tmp_type = to_struct(t.value_type)
+            members.append(s / construct.Array(t.size, tmp_type))
 
-        # Check if unbounded sequence
+        # Unbounded sequence
+        # Bounded sequence
+        if isinstance(t, rosidl_parser.definition.UnboundedSequence) or \
+            isinstance(t, rosidl_parser.definition.BoundedSequence):
+            if isinstance(t.value_type, rosidl_parser.definition.BasicType):
+                tmp_type = basic_type_conversion[t.value_type.typename]
+            else:
+                tmp_type = to_struct(t.value_type)
+            members.append(s / construct.PrefixedArray(construct.VarInt, tmp_type))
 
-        # Check if bounded sequence
+        # Unbounded string
 
-        # Check if unbounded string
+        # Bounded string
 
-        # Check if bounded string
+        # Unbounded wstring
 
-        # Check if unbounded wstring
+        # Bounded wstring
 
-        # Check if bounded wstring
-
-        # Check if basic type
+        # Basic type
         if isinstance(t, rosidl_parser.definition.BasicType):
             members.append(s / basic_type_conversion[t.typename])
     return construct.Struct(*members)
