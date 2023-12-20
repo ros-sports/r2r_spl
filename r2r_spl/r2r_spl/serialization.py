@@ -41,6 +41,14 @@ def create_container(msg_instance):
                 values[s] = [create_container(f) for f in field]
             elif isinstance(t.value_type, rosidl_parser.definition.BasicType):
                 values[s] = field
+        # Check if string type
+        if isinstance(t, rosidl_parser.definition.UnboundedString) or \
+            isinstance(t, rosidl_parser.definition.BoundedString):
+            values[s] = getattr(msg_instance, s)
+        # Check if wstring type
+        if isinstance(t, rosidl_parser.definition.UnboundedWString) or \
+            isinstance(t, rosidl_parser.definition.BoundedWString):
+            values[s] = getattr(msg_instance, s)
         # Check if basic type
         if isinstance(t, rosidl_parser.definition.BasicType):
             values[s] = getattr(msg_instance, s)

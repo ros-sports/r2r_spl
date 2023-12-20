@@ -78,6 +78,10 @@ class TestSerialization(unittest.TestCase):
         msg_instance.data_bool_unbounded_dynamic = [True, False, True, False, True]
         msg_instance.data_int8_bounded_dynamic = [70, 80]
         msg_instance.data_bool_bounded_dynamic = [False]
+        msg_instance.data_string = "Hello World"
+        msg_instance.data_string_bounded = "Hi"
+        msg_instance.data_wstring = "ハローワールド"
+        msg_instance.data_wstring_bounded = "やあ"
 
         # Serialize
         serialized = serialization.serialize(msg_instance)
@@ -95,6 +99,10 @@ class TestSerialization(unittest.TestCase):
         self.assertEqual(deserialized.data_bool_unbounded_dynamic, [True, False, True, False, True])
         numpy.testing.assert_array_equal(deserialized.data_int8_bounded_dynamic, [70, 80])
         self.assertEqual(deserialized.data_bool_bounded_dynamic, [False])
+        self.assertEqual(deserialized.data_string, "Hello World")
+        self.assertEqual(deserialized.data_string_bounded, "Hi")
+        self.assertEqual(deserialized.data_wstring, "ハローワールド")
+        self.assertEqual(deserialized.data_wstring_bounded, "やあ")
 
     def test_nested_types(self):
         """Test serialization and deserialization of nested types"""

@@ -47,12 +47,16 @@ def to_struct(msg_class) -> construct.Struct:
             members.append(s / construct.PrefixedArray(construct.VarInt, tmp_type))
 
         # Unbounded string
-
         # Bounded string
+        if isinstance(t, rosidl_parser.definition.UnboundedString) or \
+            isinstance(t, rosidl_parser.definition.BoundedString):
+            members.append(s / construct.PascalString(construct.VarInt, 'utf8'))
 
         # Unbounded wstring
-
         # Bounded wstring
+        if isinstance(t, rosidl_parser.definition.UnboundedWString) or \
+            isinstance(t, rosidl_parser.definition.BoundedWString):
+            members.append(s / construct.PascalString(construct.VarInt, 'utf16'))
 
         # Basic type
         if isinstance(t, rosidl_parser.definition.BasicType):
