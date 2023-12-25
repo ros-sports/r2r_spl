@@ -124,7 +124,12 @@ class TestR2RSPL(unittest.TestCase):
 
     def test_msg_type_not_found(self):
         """Test msg type parameter with non-existent message type"""
-        pass
+        with self.assertRaises(ModuleNotFoundError):
+            R2RSPL(parameter_overrides=[
+                Parameter('msg_type', value='NonExistentPackage.msg.BasicTypes')])
+        with self.assertRaises(AttributeError):
+            R2RSPL(parameter_overrides=[
+                Parameter('msg_type', value='r2r_spl_test_interfaces.msg.NonExistentType')])
 
     def test_wrong_packet_size(self):
         pass
