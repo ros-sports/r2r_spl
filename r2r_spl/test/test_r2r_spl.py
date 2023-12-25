@@ -57,7 +57,7 @@ class TestR2RSPL(unittest.TestCase):
         test_node = rclpy.node.Node('test')
         subscription = test_node.create_subscription(BasicTypes, 'r2r/recv', self._callback_msg, 10)
 
-        # Example message from player 2 on same team
+        # Example message from another player on same team
         serialization = Serialization(BasicTypes)
         serialized = serialization.serialize(BasicTypes())
 
@@ -132,16 +132,29 @@ class TestR2RSPL(unittest.TestCase):
                 Parameter('msg_type', value='r2r_spl_test_interfaces.msg.NonExistentType')])
 
     def test_wrong_packet_size(self):
-        pass
+        """Test receiving UDP package of incorrect size (incompatible message type)."""
+        # Setup nodes
+        r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)
+        test_node = rclpy.node.Node('test')
 
-    def test_basic_types(self):
-        pass
+        # Incorrect message type from another player on same team
+        serialization = Serialization(ArrayTypes)
+        serialized = serialization.serialize(ArrayTypes())
 
-    def test_array_types(self):
-        pass
+        # UDP - adapted from https://github.com/ninedraft/python-udp/blob/8/server.py
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            sock.sendto(serialized, ('', 10000 + self.team_num))
 
-    def test_nested_types(self):
-        pass
+        # Wait for R2RSPL to receive packet over UDP
+        time.sleep(0.1)
+
+        # Check if message has been received on topic
+        rclpy.spin_once(test_node, timeout_sec=0)
+
+        # Expect no message published
+        self.assertIsNone(self.received)
 
 if __name__ == '__main__':
     unittest.main()

@@ -92,8 +92,12 @@ class R2RSPL(Node):
                 # Convert data to ROS msg
                 msg = self._serialization.deserialize(data)
 
-                # Publish
-                self._publisher.publish(msg)
+                if msg:
+                    # Publish
+                    self._publisher.publish(msg)
+                else:
+                    # If msg is None, deserialization failed
+                    self.get_logger().error(f'deserialization failed, please ensure other robots are using the matching message type {self.msg_type}')
             except TimeoutError:
                 pass
 

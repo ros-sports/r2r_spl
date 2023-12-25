@@ -13,10 +13,11 @@ class Serialization:
         return self.struct.build(container)
 
     def deserialize(self, serialized):
-        """Deserialize a byte array to a message"""
-        # Parse and build ros message
-        # We need to do something recursive here too.......
-        parsed = self.struct.parse(serialized)
+        """Deserialize a byte array to a ROS message. Returns None, if deserialization fails."""
+        try:
+            parsed = self.struct.parse(serialized)
+        except construct.core.StreamError:
+            return None
         msg_map = {sc.name : getattr(parsed, sc.name) for sc in self.struct.subcons}
         return self.msg_class(**msg_map)
 
