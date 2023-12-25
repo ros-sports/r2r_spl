@@ -80,8 +80,7 @@ class TestR2RSPL(unittest.TestCase):
 
     def test_sending(self):
         """Test sending UDP package to teammate."""
-        r2r_spl_node = R2RSPL(    # noqa: F841
-          parameter_overrides=self.parameter_overrides)
+        r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)
         test_node = rclpy.node.Node('test')
         publisher = test_node.create_publisher(BasicTypes, 'r2r/send', 10)
 
@@ -113,10 +112,15 @@ class TestR2RSPL(unittest.TestCase):
 
     def test_invalid_msg_type(self):
         """Test msg type parameter that is in the wrong format.
-           - Not containing a dot (eg. JointState)
-           - Ending with a dot (eg. geometry_msgs.msg.)
+           - Not containing a dot (eg. r2r_spl_test_interfaces/msg/BasicTypes)
+           - Ending with a dot (eg. r2r_spl_test_interfaces.msg.)
         """
-        pass
+        with self.assertRaises(AssertionError):
+            R2RSPL(parameter_overrides=[
+                Parameter('msg_type', value='r2r_spl_test_interfaces/msg/BasicTypes')])
+        with self.assertRaises(AssertionError):
+            R2RSPL(parameter_overrides=[
+                Parameter('msg_type', value='r2r_spl_test_interfaces.msg.')])
 
     def test_msg_type_not_found(self):
         """Test msg type parameter with non-existent message type"""
