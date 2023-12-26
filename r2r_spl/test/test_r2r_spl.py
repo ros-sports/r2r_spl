@@ -25,6 +25,8 @@ from rclpy.parameter import Parameter
 
 from r2r_spl_test_interfaces.msg import ArrayTypes, BasicTypes, NestedTypes
 
+from gc_spl_interfaces.msg import RCGCD15
+
 import unittest
 
 
@@ -96,7 +98,7 @@ class TestR2RSPL(unittest.TestCase):
         publisher.publish(BasicTypes())
 
         # Wait before spinning for the msg arrive in r2r_spl_node's subscription
-        time.sleep(0.01)
+        time.sleep(0.1)
 
         # Spin r2r_spl_node to process incoming message and send out UDP message
         rclpy.spin_once(r2r_spl_node, timeout_sec=0)
@@ -155,6 +157,76 @@ class TestR2RSPL(unittest.TestCase):
 
         # Expect no message published
         self.assertIsNone(self.received)
+
+    def test_message_budget(self):
+        """Test that sending stops when message budget is low,
+        and restarts when extra budget is added"""
+        r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)
+        test_node = rclpy.node.Node('test')
+        publisher = test_node.create_publisher(BasicTypes, 'r2r/send', 10)
+        publisher_rcgcd = test_node.create_publisher(RCGCD15, 'gc/data', 10)
+
+        # Publish RCGCD with low (<10) message budget
+        rcgcd_msg = RCGCD15()
+        rcgcd_msg.teams[0].team_number = self.team_num
+        rcgcd_msg.teams[0].message_budget = 5
+        publisher_rcgcd.publish(rcgcd_msg)
+
+        # Wait before spinning for the msg arrive in r2r_spl_node's subscription
+        time.sleep(0.1)
+
+        # Spin r2r_spl_node to process incoming message
+        rclpy.spin_once(r2r_spl_node, timeout_sec=0)
+
+        # UDP - adapted from https://github.com/ninedraft/python-udp/blob/8/server.py
+        sock = socket.socket(
+            socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        sock.bind(('', 10000 + self.team_num))
+        sock.settimeout(0.1)
+
+        # Publish SPLSM to r2r_spl_node
+        publisher.publish(BasicTypes())
+
+        # Wait before spinning for the msg arrive in r2r_spl_node's subscription
+        time.sleep(0.1)
+
+        # Spin r2r_spl_node to process incoming message and send out UDP message
+        rclpy.spin_once(r2r_spl_node, timeout_sec=0)
+
+        # Check to see that packet didn't arrive
+        with self.assertRaises(TimeoutError):
+            _ = sock.recv(1024)
+
+        # Publish RCGCD with increased message budget (simulating extra time rule)
+        rcgcd_msg.teams[0].message_budget = 60
+        publisher_rcgcd.publish(rcgcd_msg)
+
+        # Wait before spinning for the msg arrive in r2r_spl_node's subscription
+        time.sleep(0.1)
+
+        # Spin r2r_spl_node to process incoming message
+        rclpy.spin_once(r2r_spl_node, timeout_sec=0)
+
+        # Publish SPLSM to r2r_spl_node
+        publisher.publish(BasicTypes())
+
+        # Wait before spinning for the msg arrive in r2r_spl_node's subscription
+        time.sleep(0.1)
+
+        # Spin r2r_spl_node to process incoming message and send out UDP message
+        rclpy.spin_once(r2r_spl_node, timeout_sec=0)
+
+        # Check if packet has arrived
+        try:
+            _ = sock.recv(1024)
+        except TimeoutError:
+            self.fail("TimeoutError, did not receive expected UDP packet")
+
+        # Close socket
+        sock.close()
+
 
 if __name__ == '__main__':
     unittest.main()

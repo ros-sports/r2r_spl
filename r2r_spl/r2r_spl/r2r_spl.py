@@ -20,12 +20,16 @@ from rclpy.node import Node
 
 from r2r_spl.serialization import Serialization
 
+from gc_spl_interfaces.msg import RCGCD15
+
 class R2RSPL(Node):
     """Node that runs on the robot to communicate with teammates (Robot-To-Robot) in SPL."""
 
     _loop_thread = None
     _sock = None
     _publisher = None
+    _team_num = None
+    _budget_reached = False
 
     def __init__(self, node_name='r2r_spl', **kwargs):
         super().__init__(node_name, **kwargs)
@@ -41,8 +45,8 @@ class R2RSPL(Node):
         )
 
         # Read and log parameters
-        self.team_num = self.get_parameter('team_num').value
-        self.get_logger().debug('team_num: {}'.format(self.team_num))
+        self._team_num = self.get_parameter('team_num').value
+        self.get_logger().debug('team_num: {}'.format(self._team_num))
 
         self.player_num = self.get_parameter('player_num').value
         self.get_logger().debug('player_num: {}'.format(self.player_num))
@@ -50,11 +54,14 @@ class R2RSPL(Node):
         self.msg_type = self.get_parameter('msg_type').value
         self.get_logger().debug('msg_type: {}'.format(self.msg_type))
 
+        # Setup subscriber that listens to message budget
+        self._subscriber_rcgcd = self.create_subscription(
+            RCGCD15, 'gc/data', self._rcgcd_callback, 10)
+
         # Evalulate and import message type
         index_last_dot = self.msg_type.rfind('.')
         assert index_last_dot != -1, f'msg_type must be in the form "package_name.<namespace>.MsgName" (eg. geometry_msgs.msg.PoseStamped). Got: {self.msg_type}'
         assert index_last_dot != len(self.msg_type) - 1, f'msg_type must be in the form "package_name.<namespace>.MsgName" (eg. geometry_msgs.msg.PoseStamped). Got: {self.msg_type}'
-
         class_name = self.msg_type[index_last_dot + 1:]
         mod = __import__(self.msg_type[:index_last_dot], fromlist=[class_name])
         msg_class = getattr(mod, class_name)
@@ -75,7 +82,7 @@ class R2RSPL(Node):
         # This has to be SO_REUSEADDR instead of SO_REUSEPORT to work with TCM
         self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        self._sock.bind(('', 10000 + self.team_num))
+        self._sock.bind(('', 10000 + self._team_num))
         # Set timeout so _loop can constantly check for rclpy.ok()
         self._sock.settimeout(0.1)
 
@@ -97,16 +104,32 @@ class R2RSPL(Node):
                     self._publisher.publish(msg)
                 else:
                     # If msg is None, deserialization failed
-                    self.get_logger().error(f'deserialization failed, please ensure other robots are using the matching message type {self.msg_type}')
+                    self.get_logger().error(f'deserialization failed, please ensure other robots are using the matching message type {self.msg_type}', once=True)
             except TimeoutError:
                 pass
 
     def _topic_callback(self, msg):
+        if not self._budget_reached:
+            data = self._serialization.serialize(msg)
 
-        data = self._serialization.serialize(msg)
+            # Broadcast data on team's UDP port
+            self._sock.sendto(data, ('', 10000 + self._team_num))
 
-        # Broadcast data on team's UDP port
-        self._sock.sendto(data, ('', 10000 + self.team_num))
+    def _rcgcd_callback(self, msg):
+        team_found = False
+        for team in msg.teams:
+            if team.team_number == self._team_num:
+                team_found = True
+
+                if not self._budget_reached and team.message_budget < 10:
+                    self.get_logger().info("Budget almost reached, not sending anymore messages")
+                    self._budget_reached = True
+                elif self._budget_reached and team.message_budget > 10:
+                    self.get_logger().info("Extra budget available, sending messages again")
+                    self._budget_reached = False
+
+        if not team_found:
+            self.get_logger().warn(f'Received messages from Game Controller about teams {msg.teams[0].team_number} and {msg.teams[1].team_number}, but team_num parameter is {self._team_num}. This is problematic if in a game.', once=True)
 
 
 def main(args=None):
