@@ -23,7 +23,7 @@ from r2r_spl.serialization import Serialization
 import rclpy
 from rclpy.parameter import Parameter
 
-from r2r_spl_test_interfaces.msg import ArrayTypes, BasicTypes, NestedTypes
+from r2r_spl_test_interfaces.msg import ArrayTypes, BasicTypes
 
 from gc_spl_interfaces.msg import RCGCD15
 
@@ -41,7 +41,7 @@ class TestR2RSPL(unittest.TestCase):
     parameter_overrides = [
         Parameter('team_num', value=team_num),
         Parameter('player_num', value=player_num),
-        Parameter('msg_type', value='r2r_spl_test_interfaces.msg.BasicTypes')]
+        Parameter('msg_type', value='r2r_spl_test_interfaces.msg.ArrayTypes')]
 
     def setUp(self):
         rclpy.init()
@@ -57,11 +57,11 @@ class TestR2RSPL(unittest.TestCase):
         # Setup nodes
         r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)
         test_node = rclpy.node.Node('test')
-        subscription = test_node.create_subscription(BasicTypes, 'r2r/recv', self._callback_msg, 10)
+        subscription = test_node.create_subscription(ArrayTypes, 'r2r/recv', self._callback_msg, 10)
 
         # Example message from another player on same team
-        serialization = Serialization(BasicTypes)
-        serialized = serialization.serialize(BasicTypes())
+        serialization = Serialization(ArrayTypes)
+        serialized = serialization.serialize(ArrayTypes())
 
         # UDP - adapted from https://github.com/ninedraft/python-udp/blob/8/server.py
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
@@ -84,7 +84,7 @@ class TestR2RSPL(unittest.TestCase):
         """Test sending UDP package to teammate."""
         r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)
         test_node = rclpy.node.Node('test')
-        publisher = test_node.create_publisher(BasicTypes, 'r2r/send', 10)
+        publisher = test_node.create_publisher(ArrayTypes, 'r2r/send', 10)
 
         # UDP - adapted from https://github.com/ninedraft/python-udp/blob/8/server.py
         sock = socket.socket(
@@ -94,8 +94,8 @@ class TestR2RSPL(unittest.TestCase):
         sock.bind(('', 10000 + self.team_num))
         sock.settimeout(0.1)
 
-        # Publish SPLSM to r2r_spl_node
-        publisher.publish(BasicTypes())
+        # Publish ArrayTypes to r2r_spl_node
+        publisher.publish(ArrayTypes())
 
         # Wait before spinning for the msg arrive in r2r_spl_node's subscription
         time.sleep(0.1)
@@ -114,12 +114,12 @@ class TestR2RSPL(unittest.TestCase):
 
     def test_invalid_msg_type(self):
         """Test msg type parameter that is in the wrong format.
-           - Not containing a dot (eg. r2r_spl_test_interfaces/msg/BasicTypes)
+           - Not containing a dot (eg. r2r_spl_test_interfaces/msg/ArrayTypes)
            - Ending with a dot (eg. r2r_spl_test_interfaces.msg.)
         """
         with self.assertRaises(AssertionError):
             R2RSPL(parameter_overrides=[
-                Parameter('msg_type', value='r2r_spl_test_interfaces/msg/BasicTypes')])
+                Parameter('msg_type', value='r2r_spl_test_interfaces/msg/ArrayTypes')])
         with self.assertRaises(AssertionError):
             R2RSPL(parameter_overrides=[
                 Parameter('msg_type', value='r2r_spl_test_interfaces.msg.')])
@@ -128,7 +128,7 @@ class TestR2RSPL(unittest.TestCase):
         """Test msg type parameter with non-existent message type"""
         with self.assertRaises(ModuleNotFoundError):
             R2RSPL(parameter_overrides=[
-                Parameter('msg_type', value='NonExistentPackage.msg.BasicTypes')])
+                Parameter('msg_type', value='NonExistentPackage.msg.ArrayTypes')])
         with self.assertRaises(AttributeError):
             R2RSPL(parameter_overrides=[
                 Parameter('msg_type', value='r2r_spl_test_interfaces.msg.NonExistentType')])
@@ -140,8 +140,8 @@ class TestR2RSPL(unittest.TestCase):
         test_node = rclpy.node.Node('test')
 
         # Incorrect message type from another player on same team
-        serialization = Serialization(ArrayTypes)
-        serialized = serialization.serialize(ArrayTypes())
+        serialization = Serialization(BasicTypes)
+        serialized = serialization.serialize(BasicTypes())
 
         # UDP - adapted from https://github.com/ninedraft/python-udp/blob/8/server.py
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
@@ -163,7 +163,7 @@ class TestR2RSPL(unittest.TestCase):
         and restarts when extra budget is added"""
         r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)
         test_node = rclpy.node.Node('test')
-        publisher = test_node.create_publisher(BasicTypes, 'r2r/send', 10)
+        publisher = test_node.create_publisher(ArrayTypes, 'r2r/send', 10)
         publisher_rcgcd = test_node.create_publisher(RCGCD15, 'gc/data', 10)
 
         # Publish RCGCD with low (<10) message budget
@@ -186,8 +186,8 @@ class TestR2RSPL(unittest.TestCase):
         sock.bind(('', 10000 + self.team_num))
         sock.settimeout(0.1)
 
-        # Publish SPLSM to r2r_spl_node
-        publisher.publish(BasicTypes())
+        # Publish ArrayTypes to r2r_spl_node
+        publisher.publish(ArrayTypes())
 
         # Wait before spinning for the msg arrive in r2r_spl_node's subscription
         time.sleep(0.1)
@@ -209,8 +209,8 @@ class TestR2RSPL(unittest.TestCase):
         # Spin r2r_spl_node to process incoming message
         rclpy.spin_once(r2r_spl_node, timeout_sec=0)
 
-        # Publish SPLSM to r2r_spl_node
-        publisher.publish(BasicTypes())
+        # Publish ArrayTypes to r2r_spl_node
+        publisher.publish(ArrayTypes())
 
         # Wait before spinning for the msg arrive in r2r_spl_node's subscription
         time.sleep(0.1)
@@ -227,6 +227,39 @@ class TestR2RSPL(unittest.TestCase):
         # Close socket
         sock.close()
 
+
+    def test_msg_size_exceeding_128_bytes(self):
+        """Test to ensure we don't send messages exceeding 128 bytes"""
+        r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)
+        test_node = rclpy.node.Node('test')
+        publisher = test_node.create_publisher(ArrayTypes, 'r2r/send', 10)
+
+        # UDP - adapted from https://github.com/ninedraft/python-udp/blob/8/server.py
+        sock = socket.socket(
+            socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        sock.bind(('', 10000 + self.team_num))
+        sock.settimeout(0.1)
+
+        # Publish ArrayTypes to r2r_spl_node
+        publisher.publish(ArrayTypes(data_string="a" * 129))
+
+        # Wait before spinning for the msg arrive in r2r_spl_node's subscription
+        time.sleep(0.1)
+
+        # Spin r2r_spl_node to process incoming message and send out UDP message
+        rclpy.spin_once(r2r_spl_node, timeout_sec=0)
+
+        # Check to see that packet didn't arrive
+        with self.assertRaises(TimeoutError):
+            _ = sock.recv(1024)
+
+        # Expect no message published
+        self.assertIsNone(self.received)
+
+        # Close socket
+        sock.close()
 
 if __name__ == '__main__':
     unittest.main()

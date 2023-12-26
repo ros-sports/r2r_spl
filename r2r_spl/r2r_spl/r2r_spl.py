@@ -22,6 +22,8 @@ from r2r_spl.serialization import Serialization
 
 from gc_spl_interfaces.msg import RCGCD15
 
+MAX_ALLOWED_MSG_SIZE = 128
+
 class R2RSPL(Node):
     """Node that runs on the robot to communicate with teammates (Robot-To-Robot) in SPL."""
 
@@ -112,8 +114,11 @@ class R2RSPL(Node):
         if not self._budget_reached:
             data = self._serialization.serialize(msg)
 
-            # Broadcast data on team's UDP port
-            self._sock.sendto(data, ('', 10000 + self._team_num))
+            if len(data) > MAX_ALLOWED_MSG_SIZE:
+                self.get_logger().error(f'Cannot send message of size {len(data)} bytes. Maximum size is 128 bytes.')
+            else:
+                # Broadcast data on team's UDP port
+                self._sock.sendto(data, ('', 10000 + self._team_num))
 
     def _rcgcd_callback(self, msg):
         team_found = False
