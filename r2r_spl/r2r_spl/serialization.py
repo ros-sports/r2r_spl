@@ -3,23 +3,59 @@ import rosidl_parser.definition
 
 class Serialization:
 
-    def __init__(self, msg_class):
+    def __init__(self, msg_class, player_num=None):
+        """Set player_num if you want to filter out messages sent by yourself."""
+
+        # Store msg_class and player number
         self.msg_class = msg_class
-        self.struct = to_struct(msg_class)
+        self.player_num = player_num
+
+        # Array to store struct members
+        members = []
+
+        # Start struct with player_num, if specified
+        if player_num is not None:
+            members.append('player_num' / construct.Int8ul)
+
+        # Add message content
+        members.append('content' / to_struct(msg_class))
+
+        # Create struct
+        self.struct = construct.Struct(*members)
 
     def serialize(self, msg_instance):
         """Serialize a message to a byte array"""
-        container = to_container(msg_instance)
+
+        # Map to store values
+        values = {}
+
+        # Set player_num, if specified
+        if self.player_num is not None:
+            values['player_num'] = self.player_num
+
+        # Set message content
+        values['content'] = to_container(msg_instance)
+
+        # Create container from map
+        container = construct.Container(**values)
+
+        # Build container, and return
         return self.struct.build(container)
 
     def deserialize(self, serialized):
-        """Deserialize a byte array to a ROS message. Returns None, if deserialization fails."""
-        try:
-            parsed = self.struct.parse(serialized)
-        except construct.core.StreamError:
-            return None
-        msg_map = {sc.name : getattr(parsed, sc.name) for sc in self.struct.subcons}
-        return self.msg_class(**msg_map)
+        """Deserialize a byte array to a ROS message.
+        Returns None, if message received matches the player_num specified in the classes' constructor.
+        Raises construct.core.StreamError if deserialization fails."""
+
+        parsed = self.struct.parse(serialized)
+
+        # If player_num is specified, check if it matches the message's player_num
+        # If it does, return None
+        if self.player_num is not None:
+            if self.player_num == parsed['player_num']:
+                return None
+
+        return self.msg_class(**parsed['content'])
 
 basic_type_conversion = {
     'float': construct.Float32l,

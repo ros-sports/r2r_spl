@@ -22,6 +22,8 @@ from r2r_spl.serialization import Serialization
 
 from gc_spl_interfaces.msg import RCGCD15
 
+import construct
+
 MAX_ALLOWED_MSG_SIZE = 128
 
 class R2RSPL(Node):
@@ -43,6 +45,7 @@ class R2RSPL(Node):
                 ('team_num', 0),
                 ('player_num', 0),
                 ('msg_type', ''),
+                ('filter_own', False),
             ]
         )
 
@@ -55,6 +58,9 @@ class R2RSPL(Node):
 
         self.msg_type = self.get_parameter('msg_type').value
         self.get_logger().debug('msg_type: {}'.format(self.msg_type))
+
+        self.filter_own = self.get_parameter('filter_own').value
+        self.get_logger().debug('filter_own: {}'.format(self.filter_own))
 
         # Setup subscriber that listens to message budget
         self._subscriber_rcgcd = self.create_subscription(
@@ -69,7 +75,7 @@ class R2RSPL(Node):
         msg_class = getattr(mod, class_name)
 
         # Setup serialization
-        self._serialization = Serialization(msg_class)
+        self._serialization = Serialization(msg_class, player_num=self.player_num if self.filter_own else None)
 
         # Setup publisher
         self._publisher = self.create_publisher(msg_class, 'r2r/recv', 10)
@@ -99,14 +105,21 @@ class R2RSPL(Node):
                 self.get_logger().debug('received: "%s"' % data)
 
                 # Convert data to ROS msg
-                msg = self._serialization.deserialize(data)
+                try:
+                    msg = self._serialization.deserialize(data)
 
-                if msg:
-                    # Publish
-                    self._publisher.publish(msg)
-                else:
-                    # If msg is None, deserialization failed
+                    if msg:
+                        # Publish
+                        self._publisher.publish(msg)
+                    else:
+                        # Reaches here if we filtered out our own message
+                        # (only if filtering is enabled via filter_own parameter)
+                        pass
+
+                except construct.core.StreamError:
+                    # Deserialization failed
                     self.get_logger().error(f'deserialization failed, please ensure other robots are using the matching message type {self.msg_type}', once=True)
+
             except TimeoutError:
                 pass
 

@@ -76,9 +76,50 @@ class TestR2RSPL(unittest.TestCase):
         rclpy.spin_once(test_node, timeout_sec=0)
         self.assertIsNotNone(self.received)
 
-    def test_not_receiving_myself(self):
-        """Test ignoring UDP package sent from myself."""
-        pass
+    def test_filter_own(self):
+        """Test ignoring UDP package sent from myself,
+           but accepting others when filter_own param is set to True"""
+        r2r_spl_node = R2RSPL(parameter_overrides=[
+            Parameter('team_num', value=self.team_num),
+            Parameter('player_num', value=self.player_num),
+            Parameter('msg_type', value='r2r_spl_test_interfaces.msg.ArrayTypes'),
+            Parameter('filter_own', value=True)])
+        test_node = rclpy.node.Node('test')
+        subscription = test_node.create_subscription(ArrayTypes, 'r2r/recv', self._callback_msg, 10)
+
+        # Send message from myself
+        serialization = Serialization(ArrayTypes, player_num=self.player_num)
+        serialized = serialization.serialize(ArrayTypes())
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            sock.sendto(serialized, ('', 10000 + self.team_num))
+
+        # Wait for R2RSPL to receive packet over UDP
+        time.sleep(0.1)
+
+        # Check if message has been received on topic
+        rclpy.spin_once(test_node, timeout_sec=0)
+
+        # Expect no message published
+        self.assertIsNone(self.received)
+
+        # Send message from another player on same team
+        serialization = Serialization(ArrayTypes, player_num=5)
+        serialized = serialization.serialize(ArrayTypes())
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as sock:
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            sock.sendto(serialized, ('', 10000 + self.team_num))
+
+        # Wait for R2RSPL to receive packet over UDP
+        time.sleep(0.1)
+
+        # Check if message has been received on topic
+        rclpy.spin_once(test_node, timeout_sec=0)
+
+        # Expect message to be published
+        self.assertIsNotNone(self.received)
 
     def test_sending(self):
         """Test sending UDP package to teammate."""
