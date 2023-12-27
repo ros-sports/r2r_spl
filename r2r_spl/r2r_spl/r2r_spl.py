@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import construct
 import socket
 from threading import Thread
 
@@ -21,8 +22,6 @@ from rclpy.node import Node
 from r2r_spl.serialization import Serialization
 
 from gc_spl_interfaces.msg import RCGCD15
-
-import construct
 
 MAX_ALLOWED_MSG_SIZE = 128
 
