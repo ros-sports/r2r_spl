@@ -14,18 +14,14 @@
 
 import socket
 import time
-
-from r2r_spl.r2r_spl import R2RSPL
-from r2r_spl.serialization import Serialization
-
-import rclpy
-from rclpy.parameter import Parameter
-
-from r2r_spl_test_interfaces.msg import ArrayTypes, BasicTypes
+import unittest
 
 from gc_spl_interfaces.msg import RCGCD15
-
-import unittest
+from r2r_spl.r2r_spl import R2RSPL
+from r2r_spl.serialization import Serialization
+from r2r_spl_test_interfaces.msg import ArrayTypes, BasicTypes
+import rclpy
+from rclpy.parameter import Parameter
 
 
 class TestR2RSPL(unittest.TestCase):
@@ -153,7 +149,7 @@ class TestR2RSPL(unittest.TestCase):
         try:
             _ = sock.recv(1024)
         except TimeoutError:
-            self.fail("TimeoutError, did not receive expected UDP packet")
+            self.fail('TimeoutError, did not receive expected UDP packet')
 
         # Close socket
         sock.close()
@@ -276,7 +272,7 @@ class TestR2RSPL(unittest.TestCase):
         try:
             _ = sock.recv(1024)
         except TimeoutError:
-            self.fail("TimeoutError, did not receive expected UDP packet")
+            self.fail('TimeoutError, did not receive expected UDP packet')
 
         # Close socket
         sock.close()
@@ -296,7 +292,7 @@ class TestR2RSPL(unittest.TestCase):
         sock.settimeout(0.1)
 
         # Publish ArrayTypes to r2r_spl_node
-        publisher.publish(ArrayTypes(data_string="a" * 129))
+        publisher.publish(ArrayTypes(data_string='a' * 129))
 
         # Wait before spinning for the msg arrive in r2r_spl_node's subscription
         time.sleep(0.1)

@@ -12,16 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import construct
 import socket
 from threading import Thread
 
+import construct
+from gc_spl_interfaces.msg import RCGCD15
 import rclpy
 from rclpy.node import Node
-
 from r2r_spl.serialization import Serialization
-
-from gc_spl_interfaces.msg import RCGCD15
 
 MAX_ALLOWED_MSG_SIZE = 128
 
@@ -107,7 +105,7 @@ class R2RSPL(Node):
         while rclpy.ok():
             try:
                 data, _ = self._sock.recvfrom(1024)
-                self.get_logger().debug('received: "%s"' % data)
+                self.get_logger().debug(f'received: {data}')
 
                 # Convert data to ROS msg
                 try:
@@ -148,10 +146,10 @@ class R2RSPL(Node):
                 team_found = True
 
                 if not self._budget_reached and team.message_budget < 10:
-                    self.get_logger().info("Budget almost reached, not sending anymore messages")
+                    self.get_logger().info('Budget almost reached, not sending anymore messages')
                     self._budget_reached = True
                 elif self._budget_reached and team.message_budget > 10:
-                    self.get_logger().info("Extra budget available, sending messages again")
+                    self.get_logger().info('Extra budget available, sending messages again')
                     self._budget_reached = False
 
         if not team_found:
