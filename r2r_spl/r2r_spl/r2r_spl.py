@@ -26,6 +26,7 @@ import construct
 
 MAX_ALLOWED_MSG_SIZE = 128
 
+
 class R2RSPL(Node):
     """Node that runs on the robot to communicate with teammates (Robot-To-Robot) in SPL."""
 
@@ -68,14 +69,19 @@ class R2RSPL(Node):
 
         # Evalulate and import message type
         index_last_dot = self.msg_type.rfind('.')
-        assert index_last_dot != -1, f'msg_type must be in the form "package_name.<namespace>.MsgName" (eg. geometry_msgs.msg.PoseStamped). Got: {self.msg_type}'
-        assert index_last_dot != len(self.msg_type) - 1, f'msg_type must be in the form "package_name.<namespace>.MsgName" (eg. geometry_msgs.msg.PoseStamped). Got: {self.msg_type}'
+        assert index_last_dot != -1, \
+            f'msg_type must be in the form "package_name.<namespace>.MsgName" ' \
+            f'(eg. geometry_msgs.msg.PoseStamped). Got: {self.msg_type}'
+        assert index_last_dot != len(self.msg_type) - 1, \
+            f'msg_type must be in the form "package_name.<namespace>.MsgName" ' \
+            f'(eg. geometry_msgs.msg.PoseStamped). Got: {self.msg_type}'
         class_name = self.msg_type[index_last_dot + 1:]
         mod = __import__(self.msg_type[:index_last_dot], fromlist=[class_name])
         msg_class = getattr(mod, class_name)
 
         # Setup serialization
-        self._serialization = Serialization(msg_class, player_num=self.player_num if self.filter_own else None)
+        self._serialization = Serialization(
+            msg_class, player_num=self.player_num if self.filter_own else None)
 
         # Setup publisher
         self._publisher = self.create_publisher(msg_class, 'r2r/recv', 10)
@@ -118,7 +124,9 @@ class R2RSPL(Node):
 
                 except construct.core.StreamError:
                     # Deserialization failed
-                    self.get_logger().error(f'deserialization failed, please ensure other robots are using the matching message type {self.msg_type}', once=True)
+                    self.get_logger().error(
+                        f'deserialization failed, please ensure other robots are using the '
+                        f'matching message type {self.msg_type}', once=True)
 
             except TimeoutError:
                 pass
@@ -128,7 +136,8 @@ class R2RSPL(Node):
             data = self._serialization.serialize(msg)
 
             if len(data) > MAX_ALLOWED_MSG_SIZE:
-                self.get_logger().error(f'Cannot send message of size {len(data)} bytes. Maximum size is 128 bytes.')
+                self.get_logger().error(
+                    f'Cannot send message of size {len(data)} bytes. Maximum size is 128 bytes.')
             else:
                 # Broadcast data on team's UDP port
                 self._sock.sendto(data, ('', 10000 + self._team_num))
@@ -147,7 +156,10 @@ class R2RSPL(Node):
                     self._budget_reached = False
 
         if not team_found:
-            self.get_logger().warn(f'Received messages from Game Controller about teams {msg.teams[0].team_number} and {msg.teams[1].team_number}, but team_num parameter is {self._team_num}. This is problematic if in a game.', once=True)
+            self.get_logger().warn(
+                f'Received messages from Game Controller about teams {msg.teams[0].team_number} '
+                f'and {msg.teams[1].team_number}, but team_num parameter is {self._team_num}. '
+                f'This is problematic if in a game.', once=True)
 
 
 def main(args=None):

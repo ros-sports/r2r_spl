@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from construct import Container
 
 from r2r_spl_test_interfaces.msg import ArrayTypes, BasicTypes, NestedTypes
 from r2r_spl.serialization import Serialization
@@ -21,10 +20,11 @@ import unittest
 
 import numpy.testing
 
+
 class TestSerialization(unittest.TestCase):
 
     def test_basic_types(self):
-        """Test serialization and deserialization of basic types"""
+        """Test serialization and deserialization of basic types."""
         # Initialize serialization object
         serialization = Serialization(BasicTypes)
 
@@ -69,7 +69,7 @@ class TestSerialization(unittest.TestCase):
         self.assertEqual(deserialized.val_uint64, 8)
 
     def test_array_types(self):
-        """Test serialization and deserialization of array types"""
+        """Test serialization and deserialization of array types."""
         # Initialize serialization object
         serialization = Serialization(ArrayTypes)
 
@@ -98,8 +98,10 @@ class TestSerialization(unittest.TestCase):
         # Check values match original message
         numpy.testing.assert_array_equal(deserialized.data_int8_static, [1, 2, 3])
         self.assertEqual(deserialized.data_bool_static, [False, True])
-        numpy.testing.assert_array_equal(deserialized.data_int8_unbounded_dynamic, [10, 20, 30, 40])
-        self.assertEqual(deserialized.data_bool_unbounded_dynamic, [True, False, True, False, True])
+        numpy.testing.assert_array_equal(
+            deserialized.data_int8_unbounded_dynamic, [10, 20, 30, 40])
+        self.assertEqual(
+            deserialized.data_bool_unbounded_dynamic, [True, False, True, False, True])
         numpy.testing.assert_array_equal(deserialized.data_int8_bounded_dynamic, [70, 80])
         self.assertEqual(deserialized.data_bool_bounded_dynamic, [False])
         self.assertEqual(deserialized.data_string, "Hello World")
@@ -108,7 +110,7 @@ class TestSerialization(unittest.TestCase):
         self.assertEqual(deserialized.data_wstring_bounded, "やあ")
 
     def test_nested_types(self):
-        """Test serialization and deserialization of nested types"""
+        """Test serialization and deserialization of nested types."""
         # Initialize serialization object
         serialization = Serialization(NestedTypes)
 
@@ -130,6 +132,7 @@ class TestSerialization(unittest.TestCase):
         self.assertEqual(deserialized.data_basic_types.val_uint8, 101)
         self.assertEqual(len(deserialized.data_basic_types_array), 2)
         self.assertEqual(deserialized.data_basic_types_array[1].val_int8, -10)
+
 
 if __name__ == '__main__':
     unittest.main()

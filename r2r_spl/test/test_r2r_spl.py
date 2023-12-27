@@ -15,8 +15,6 @@
 import socket
 import time
 
-from construct import Container
-
 from r2r_spl.r2r_spl import R2RSPL
 from r2r_spl.serialization import Serialization
 
@@ -55,9 +53,10 @@ class TestR2RSPL(unittest.TestCase):
     def test_receiving(self):
         """Test receiving UDP package from teammate."""
         # Setup nodes
-        r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)
+        r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)  # noqa: F841
         test_node = rclpy.node.Node('test')
-        subscription = test_node.create_subscription(ArrayTypes, 'r2r/recv', self._callback_msg, 10)
+        subscription = test_node.create_subscription(  # noqa: F841
+            ArrayTypes, 'r2r/recv', self._callback_msg, 10)
 
         # Example message from another player on same team
         serialization = Serialization(ArrayTypes)
@@ -77,15 +76,21 @@ class TestR2RSPL(unittest.TestCase):
         self.assertIsNotNone(self.received)
 
     def test_filter_own(self):
-        """Test ignoring UDP package sent from myself,
-           but accepting others when filter_own param is set to True"""
-        r2r_spl_node = R2RSPL(parameter_overrides=[
+        """
+        Test filtering of packages, when filter_own param is set to True.
+
+        Check:
+        - Packet sent by myself is ignored
+        - Packet from teammate is processed
+        """
+        r2r_spl_node = R2RSPL(parameter_overrides=[  # noqa: F841
             Parameter('team_num', value=self.team_num),
             Parameter('player_num', value=self.player_num),
             Parameter('msg_type', value='r2r_spl_test_interfaces.msg.ArrayTypes'),
             Parameter('filter_own', value=True)])
         test_node = rclpy.node.Node('test')
-        subscription = test_node.create_subscription(ArrayTypes, 'r2r/recv', self._callback_msg, 10)
+        subscription = test_node.create_subscription(  # noqa: F841
+            ArrayTypes, 'r2r/recv', self._callback_msg, 10)
 
         # Send message from myself
         serialization = Serialization(ArrayTypes, player_num=self.player_num)
@@ -123,7 +128,7 @@ class TestR2RSPL(unittest.TestCase):
 
     def test_sending(self):
         """Test sending UDP package to teammate."""
-        r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)
+        r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)  # noqa: F841
         test_node = rclpy.node.Node('test')
         publisher = test_node.create_publisher(ArrayTypes, 'r2r/send', 10)
 
@@ -154,9 +159,12 @@ class TestR2RSPL(unittest.TestCase):
         sock.close()
 
     def test_invalid_msg_type(self):
-        """Test msg type parameter that is in the wrong format.
-           - Not containing a dot (eg. r2r_spl_test_interfaces/msg/ArrayTypes)
-           - Ending with a dot (eg. r2r_spl_test_interfaces.msg.)
+        """
+        Test msg type parameter that is in the wrong format.
+
+        Check:
+        - Msg type not containing a dot (eg. r2r_spl_test_interfaces/msg/ArrayTypes)
+        - Msg type ending with a dot (eg. r2r_spl_test_interfaces.msg.)
         """
         with self.assertRaises(AssertionError):
             R2RSPL(parameter_overrides=[
@@ -166,7 +174,7 @@ class TestR2RSPL(unittest.TestCase):
                 Parameter('msg_type', value='r2r_spl_test_interfaces.msg.')])
 
     def test_msg_type_not_found(self):
-        """Test msg type parameter with non-existent message type"""
+        """Test msg type parameter with non-existent message type."""
         with self.assertRaises(ModuleNotFoundError):
             R2RSPL(parameter_overrides=[
                 Parameter('msg_type', value='NonExistentPackage.msg.ArrayTypes')])
@@ -177,7 +185,7 @@ class TestR2RSPL(unittest.TestCase):
     def test_wrong_packet_size(self):
         """Test receiving UDP package of incorrect size (incompatible message type)."""
         # Setup nodes
-        r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)
+        r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)  # noqa: F841
         test_node = rclpy.node.Node('test')
 
         # Incorrect message type from another player on same team
@@ -200,9 +208,14 @@ class TestR2RSPL(unittest.TestCase):
         self.assertIsNone(self.received)
 
     def test_message_budget(self):
-        """Test that sending stops when message budget is low,
-        and restarts when extra budget is added"""
-        r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)
+        """
+        Test to ensure the SPL message budget is not exceeded.
+
+        Check:
+        - Sending stops when message budget is low
+        - Sending restarts when extra budget is added
+        """
+        r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)  # noqa: F841
         test_node = rclpy.node.Node('test')
         publisher = test_node.create_publisher(ArrayTypes, 'r2r/send', 10)
         publisher_rcgcd = test_node.create_publisher(RCGCD15, 'gc/data', 10)
@@ -268,10 +281,9 @@ class TestR2RSPL(unittest.TestCase):
         # Close socket
         sock.close()
 
-
     def test_msg_size_exceeding_128_bytes(self):
-        """Test to ensure we don't send messages exceeding 128 bytes"""
-        r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)
+        """Test to ensure we don't send messages exceeding 128 bytes."""
+        r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)  # noqa: F841
         test_node = rclpy.node.Node('test')
         publisher = test_node.create_publisher(ArrayTypes, 'r2r/send', 10)
 
@@ -301,6 +313,7 @@ class TestR2RSPL(unittest.TestCase):
 
         # Close socket
         sock.close()
+
 
 if __name__ == '__main__':
     unittest.main()
