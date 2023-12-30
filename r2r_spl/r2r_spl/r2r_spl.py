@@ -18,8 +18,8 @@ from threading import Thread
 import construct
 from gc_spl_interfaces.msg import RCGCD15
 import rclpy
-from rclpy.node import Node
 from r2r_spl.serialization import Serialization
+from rclpy.node import Node
 
 MAX_ALLOWED_MSG_SIZE = 128
 

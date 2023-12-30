@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import numpy.testing
 import unittest
+
+import numpy.testing
 
 from r2r_spl.serialization import Serialization
 from r2r_spl_test_interfaces.msg import ArrayTypes, BasicTypes, NestedTypes
