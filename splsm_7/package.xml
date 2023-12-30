@@ -18,5 +18,9 @@
 
   <export>
     <build_type>ament_cmake</build_type>
+    <deprecated>
+      Please use r2r_spl. splsm_7 will be removed in K-turtle.
+      Instructions are provided at https://robot2robot-spl.readthedocs.io/
+    </deprecated>
   </export>
 </package>

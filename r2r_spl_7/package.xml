@@ -17,5 +17,9 @@
 
   <export>
     <build_type>ament_python</build_type>
+    <deprecated>
+      Please use r2r_spl. r2r_spl_7 will be removed in K-turtle.
+      Instructions are provided at https://robot2robot-spl.readthedocs.io/
+    </deprecated>
   </export>
 </package>
