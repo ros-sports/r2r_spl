@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'r2r_spl = r2r_spl.r2r_spl:main',
         ],
     },
 )
