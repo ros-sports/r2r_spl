@@ -17,6 +17,7 @@ from threading import Thread
 
 import construct
 from gc_spl_interfaces.msg import RCGCD15
+from r2r_spl.exceptions import ParameterNotSetException
 from r2r_spl.serialization import Serialization
 import rclpy
 from rclpy.node import Node
@@ -50,9 +51,13 @@ class R2RSPL(Node):
         # Read and log parameters
         self._team_num = self.get_parameter('team_num').value
         self.get_logger().debug('team_num: {}'.format(self._team_num))
+        if self._team_num == 0:
+            self.get_logger().warn('"team_num" parameter is 0. This is problematic if in a game.')
 
         self.player_num = self.get_parameter('player_num').value
         self.get_logger().debug('player_num: {}'.format(self.player_num))
+        if self.player_num == 0:
+            self.get_logger().warn('"player_num" parameter is 0. This is problematic if in a game.')
 
         self.msg_type = self.get_parameter('msg_type').value
         self.get_logger().debug('msg_type: {}'.format(self.msg_type))
@@ -65,6 +70,8 @@ class R2RSPL(Node):
             RCGCD15, 'gc/data', self._rcgcd_callback, 10)
 
         # Evalulate and import message type
+        if self.msg_type == "":
+            raise ParameterNotSetException('"msg_type" parameter must be set.')
         index_last_dot = self.msg_type.rfind('.')
         assert index_last_dot != -1, \
             f'msg_type must be in the form "package_name.<namespace>.MsgName" ' \
