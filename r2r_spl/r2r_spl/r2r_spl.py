@@ -119,8 +119,10 @@ class R2RSPL(Node):
                     msg = self._serialization.deserialize(data)
 
                     if msg:
-                        # Publish
-                        self._publisher.publish(msg)
+                        # Publish. Make sure we haven't shutdown, since node could have been
+                        # shutdown while waiting for the packet.
+                        if rclpy.ok():
+                            self._publisher.publish(msg)
                     else:
                         # Reaches here if we filtered out our own message
                         # (only if filtering is enabled via filter_own parameter)
