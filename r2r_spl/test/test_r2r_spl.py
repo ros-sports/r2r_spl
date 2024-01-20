@@ -37,17 +37,13 @@ class TestR2RSPL(unittest.TestCase):
         Parameter('player_num', value=player_num),
         Parameter('msg_type', value='r2r_spl_test_interfaces.msg.ArrayTypes')]
 
-    def setUp(self):
-        rclpy.init()
-
-    def tearDown(self):
-        rclpy.shutdown()
-
     def _callback_msg(self, msg):
         self.received = msg
 
     def test_receiving(self):
         """Test receiving UDP package from teammate."""
+        rclpy.init()
+
         # Setup nodes
         r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)  # noqa: F841
         test_node = rclpy.node.Node('test')
@@ -71,6 +67,10 @@ class TestR2RSPL(unittest.TestCase):
         rclpy.spin_once(test_node, timeout_sec=0)
         self.assertIsNotNone(self.received)
 
+        # Shutdown, then ensure thread is joined
+        rclpy.shutdown()
+        r2r_spl_node._loop_thread.join()
+
     def test_filter_own(self):
         """
         Test filtering of packages, when filter_own param is set to True.
@@ -79,6 +79,8 @@ class TestR2RSPL(unittest.TestCase):
         - Packet sent by myself is ignored
         - Packet from teammate is processed
         """
+        rclpy.init()
+
         r2r_spl_node = R2RSPL(parameter_overrides=[  # noqa: F841
             Parameter('team_num', value=self.team_num),
             Parameter('player_num', value=self.player_num),
@@ -122,8 +124,14 @@ class TestR2RSPL(unittest.TestCase):
         # Expect message to be published
         self.assertIsNotNone(self.received)
 
+        # Shutdown, then ensure thread is joined
+        rclpy.shutdown()
+        r2r_spl_node._loop_thread.join()
+
     def test_sending(self):
         """Test sending UDP package to teammate."""
+        rclpy.init()
+
         r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)  # noqa: F841
         test_node = rclpy.node.Node('test')
         publisher = test_node.create_publisher(ArrayTypes, 'r2r/send', 10)
@@ -154,6 +162,10 @@ class TestR2RSPL(unittest.TestCase):
         # Close socket
         sock.close()
 
+        # Shutdown, then ensure thread is joined
+        rclpy.shutdown()
+        r2r_spl_node._loop_thread.join()
+
     def test_invalid_msg_type(self):
         """
         Test msg type parameter that is in the wrong format.
@@ -162,24 +174,32 @@ class TestR2RSPL(unittest.TestCase):
         - Msg type not containing a dot (eg. r2r_spl_test_interfaces/msg/ArrayTypes)
         - Msg type ending with a dot (eg. r2r_spl_test_interfaces.msg.)
         """
+        rclpy.init()
+
         with self.assertRaises(AssertionError):
             R2RSPL(parameter_overrides=[
                 Parameter('msg_type', value='r2r_spl_test_interfaces/msg/ArrayTypes')])
         with self.assertRaises(AssertionError):
             R2RSPL(parameter_overrides=[
                 Parameter('msg_type', value='r2r_spl_test_interfaces.msg.')])
+        rclpy.shutdown()
 
     def test_msg_type_not_found(self):
         """Test msg type parameter with non-existent message type."""
+        rclpy.init()
+
         with self.assertRaises(ModuleNotFoundError):
             R2RSPL(parameter_overrides=[
                 Parameter('msg_type', value='NonExistentPackage.msg.ArrayTypes')])
         with self.assertRaises(AttributeError):
             R2RSPL(parameter_overrides=[
                 Parameter('msg_type', value='r2r_spl_test_interfaces.msg.NonExistentType')])
+        rclpy.shutdown()
 
     def test_wrong_packet_size(self):
         """Test receiving UDP package of incorrect size (incompatible message type)."""
+        rclpy.init()
+
         # Setup nodes
         r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)  # noqa: F841
         test_node = rclpy.node.Node('test')
@@ -203,6 +223,10 @@ class TestR2RSPL(unittest.TestCase):
         # Expect no message published
         self.assertIsNone(self.received)
 
+        # Shutdown, then ensure thread is joined
+        rclpy.shutdown()
+        r2r_spl_node._loop_thread.join()
+
     def test_message_budget(self):
         """
         Test to ensure the SPL message budget is not exceeded.
@@ -211,6 +235,8 @@ class TestR2RSPL(unittest.TestCase):
         - Sending stops when message budget is low
         - Sending restarts when extra budget is added
         """
+        rclpy.init()
+
         r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)  # noqa: F841
         test_node = rclpy.node.Node('test')
         publisher = test_node.create_publisher(ArrayTypes, 'r2r/send', 10)
@@ -277,8 +303,13 @@ class TestR2RSPL(unittest.TestCase):
         # Close socket
         sock.close()
 
+        # Shutdown, then ensure thread is joined
+        rclpy.shutdown()
+        r2r_spl_node._loop_thread.join()
+
     def test_msg_size_exceeding_128_bytes(self):
         """Test to ensure we don't send messages exceeding 128 bytes."""
+        rclpy.init()
         r2r_spl_node = R2RSPL(parameter_overrides=self.parameter_overrides)  # noqa: F841
         test_node = rclpy.node.Node('test')
         publisher = test_node.create_publisher(ArrayTypes, 'r2r/send', 10)
@@ -309,6 +340,10 @@ class TestR2RSPL(unittest.TestCase):
 
         # Close socket
         sock.close()
+
+        # Shutdown, then ensure thread is joined
+        rclpy.shutdown()
+        r2r_spl_node._loop_thread.join()
 
 
 if __name__ == '__main__':
