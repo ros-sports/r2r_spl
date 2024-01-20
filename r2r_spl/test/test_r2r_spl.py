@@ -16,7 +16,7 @@ import socket
 import time
 import unittest
 
-from gc_spl_interfaces.msg import RCGCD15
+from game_controller_spl_interfaces.msg import RCGCD15
 from r2r_spl.r2r_spl import R2RSPL
 from r2r_spl.serialization import Serialization
 from r2r_spl_test_interfaces.msg import ArrayTypes, BasicTypes
