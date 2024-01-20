@@ -16,7 +16,7 @@ import socket
 from threading import Thread
 
 import construct
-from gc_spl_interfaces.msg import RCGCD15
+from game_controller_spl_interfaces.msg import RCGCD15
 from r2r_spl.exceptions import ParameterNotSetException
 from r2r_spl.serialization import Serialization
 import rclpy
