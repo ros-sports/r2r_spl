@@ -144,7 +144,7 @@ class R2RSPL(Node):
                     f'Cannot send message of size {len(data)} bytes. Maximum size is 128 bytes.')
             else:
                 # Broadcast data on team's UDP port
-                self._sock.sendto(data, ('', 10000 + self._team_num))
+                self._sock.sendto(data, ('<broadcast>', 10000 + self._team_num))
 
     def _rcgcd_callback(self, msg):
         team_found = False
