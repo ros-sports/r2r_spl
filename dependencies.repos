@@ -2,4 +2,4 @@ repositories:
   game_controller_spl:
     type: git
     url: https://github.com/ros-sports/game_controller_spl.git
-    version: rolling
+    version: humble
