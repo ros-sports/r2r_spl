@@ -70,7 +70,7 @@ class Serialization:
             if self.player_num == parsed['player_num']:
                 return None
 
-        return self.msg_class(**parsed['content'])
+        return to_msg(parsed['content'], self.msg_class)
 
 
 basic_type_conversion = {
@@ -175,3 +175,43 @@ def to_container(msg_instance) -> construct.Container:
         elif isinstance(t, rosidl_parser.definition.BasicType):
             values[s] = getattr(msg_instance, s)
     return construct.Container(**values)
+
+
+def to_msg(container, msg_class):
+    values = {}
+
+    for s, t in zip(msg_class.get_fields_and_field_types().keys(), msg_class.SLOT_TYPES):
+        if s in container:
+            # Nested Type
+            if isinstance(t, rosidl_parser.definition.NamespacedType):
+                mod = __import__('.'.join(t.namespaces), fromlist=[t.name])
+                klass = getattr(mod, t.name)
+                values[s] = to_msg(container[s], klass)
+            # Array
+            elif (isinstance(t, rosidl_parser.definition.Array) or
+                  isinstance(t, rosidl_parser.definition.UnboundedSequence) or
+                  isinstance(t, rosidl_parser.definition.BoundedSequence)):
+                tmp_array = []
+                if isinstance(t.value_type, rosidl_parser.definition.NamespacedType):
+                    mod = __import__('.'.join(t.value_type.namespaces),
+                                     fromlist=[t.value_type.name])
+                    klass = getattr(mod, t.value_type.name)
+                    for v in container[s]:
+                        tmp_array.append(to_msg(v, klass))
+                else:
+                    for v in container[s]:
+                        tmp_array.append(v)
+                values[s] = tmp_array
+            # Basic Type
+            # Unbounded string
+            # Bounded string
+            # Unbounded wstring
+            # Bounded wstring
+            elif (isinstance(t, rosidl_parser.definition.BasicType) or
+                  isinstance(t, rosidl_parser.definition.UnboundedString) or
+                  isinstance(t, rosidl_parser.definition.BoundedString) or
+                  isinstance(t, rosidl_parser.definition.UnboundedWString) or
+                  isinstance(t, rosidl_parser.definition.BoundedWString)):
+                values[s] = container[s]
+
+    return msg_class(**values)
