@@ -4,7 +4,7 @@
   <name>r2r_spl</name>
   <version>0.0.0</version>
   <description>Robot-to-Robot Communication in RoboCup Standard Platform League</description>
-  <maintainer email="kenjibrameld@gmail.com">vscode</maintainer>
+  <maintainer email="kenjibrameld@gmail.com">ijnek</maintainer>
   <license>Apache License 2.0</license>
 
   <exec_depend>python3-construct</exec_depend>
