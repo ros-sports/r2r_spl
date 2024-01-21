@@ -18,5 +18,11 @@
 
   <export>
     <build_type>ament_cmake</build_type>
+    <deprecated>
+      splsm_7 is deprecated as of J-turtle, and will be removed in K-turtle.
+      There is no Standard Message defined in the SPL rule book since 2023, and teams are free
+      to define their own message.
+      You can use r2r_spl with your custom message to achieve robot to robot communciation.
+    </deprecated>
   </export>
 </package>
