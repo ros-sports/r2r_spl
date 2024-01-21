@@ -17,5 +17,10 @@
 
   <export>
     <build_type>ament_python</build_type>
+    <deprecated>
+      splsm_8_conversion is deprecated as of J-turtle, and will be removed in K-turtle.
+      Please transition to use r2r_spl instead of r2r_spl_8, so that you don't depend on this
+      package.
+    </deprecated>
   </export>
 </package>
