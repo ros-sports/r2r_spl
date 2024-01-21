@@ -32,7 +32,7 @@ class TestR2RSPL:
 
     received = None
 
-    team_num = 1
+    team_num = 3
     player_num = 1
 
     parameter_overrides = [
