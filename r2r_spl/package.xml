@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>r2r_spl</name>
-  <version>3.0.1</version>
+  <version>4.0.0</version>
   <description>Robot-to-Robot Communication in RoboCup Standard Platform League</description>
   <maintainer email="kenjibrameld@gmail.com">ijnek</maintainer>
   <license>Apache License 2.0</license>
